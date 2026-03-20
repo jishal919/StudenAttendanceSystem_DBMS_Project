@@ -11,7 +11,7 @@ app.secret_key = 'attendance_sys_secret_2025'
 DB_CONFIG = {
     'host':     'localhost',
     'user':     'root',
-    'password': 'MJT_MYSQL.py',          
+    'password': '',          
     'database': 'attendance_db'
 }
 
