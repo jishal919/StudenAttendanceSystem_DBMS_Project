@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Attendance Report{% endblock %}
+{% block page_sub %}View detailed attendance percentage per student per subject{% endblock %}
+
+{% block content %}
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-header">
+    <div class="card-title">🔍 Filter Report</div>
+  </div>
+  <form method="GET" class="filter-bar">
+    <div class="form-group">
+      <label>Department</label>
+      <select name="dept">
+        <option value="">All Departments</option>
+        {% for d in departments %}
+        <option value="{{ d }}" {% if dept_filter==d %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Subject</label>
+      <select name="subject_id">
+        <option value="">All Subjects</option>
+        {% for sub in subjects %}
+        <option value="{{ sub.subject_id }}"
+          {% if sub_filter==sub.subject_id|string %}selected{% endif %}>
+          {{ sub.subject_name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Apply Filter</button>
+    <a href="{{ url_for('report') }}" class="btn btn-ghost">Clear</a>
+  </form>
+</div>
+
+<!-- Report Table -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">📋 Attendance Summary</div>
+      <div class="card-sub">{{ report|length }} record(s) · 🟢 ≥75%  🟡 50–74%  🔴 &lt;50%</div>
+    </div>
+  </div>
+
+  {% if report %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Dept</th>
+          <th>Subject</th>
+          <th>Present</th>
+          <th>Absent</th>
+          <th>Total</th>
+          <th style="min-width:200px;">Attendance %</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in report %}
+        {% set pct = r.percentage %}
+        <tr>
+          <td class="text-muted font-mono text-sm">{{ loop.index }}</td>
+          <td class="fw-600">{{ r.student_name }}</td>
+          <td><span class="badge badge-dept">{{ r.department }}</span></td>
+          <td>{{ r.subject_name }}</td>
+          <td style="color:#16a34a; font-weight:600;">{{ r.presents }}</td>
+          <td style="color:#dc2626; font-weight:600;">{{ r.absents }}</td>
+          <td class="font-mono">{{ r.total_classes }}</td>
+          <td>
+            <div class="pct-wrap">
+              <div class="pct-bar">
+                <div class="pct-fill
+                  {% if pct >= 75 %}good{% elif pct >= 50 %}average{% else %}poor{% endif %}"
+                  style="width:{{ pct }}%;">
+                </div>
+              </div>
+              <span class="pct-text
+                {% if pct >= 75 %}" style="color:#16a34a;"
+                {% elif pct >= 50 %}" style="color:#d97706;"
+                {% else %}" style="color:#dc2626;"
+                {% endif %}>
+                {{ pct }}%
+              </span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">📭</div>
+    <div class="empty-text">No attendance data found. Try marking attendance first.</div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

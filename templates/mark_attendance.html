@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Mark Attendance{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+{% block page_sub %}Select subject and date, then mark each student{% endblock %}
+
+{% block content %}
+
+<!-- Step 1: Select Subject + Date -->
+<div class="card mb-4">
+  <div class="card-header">
+    <div>
+      <div class="card-title">🗓️ Step 1 — Select Subject & Date</div>
+      <div class="card-sub">Choose the subject and the class date</div>
+    </div>
+  </div>
+  <form method="GET">
+    <div class="form-grid">
+      <div class="form-group" style="min-width:220px;">
+        <label>Subject</label>
+        <select name="subject_id" required>
+          <option value="">— Choose subject —</option>
+          {% for sub in subjects %}
+          <option value="{{ sub.subject_id }}"
+            {% if selected_subject == sub.subject_id|string %}selected{% endif %}>
+            {{ sub.subject_name }}
+            <span style="color:var(--muted)"> · {{ sub.faculty_name }}</span>
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" name="date" value="{{ selected_date }}" required/>
+      </div>
+    </div>
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary">Load Students →</button>
+    </div>
+  </form>
+</div>
+
+<!-- Step 2: Mark Each Student -->
+{% if student_list %}
+<form method="POST">
+  <input type="hidden" name="subject_id" value="{{ selected_subject }}"/>
+  <input type="hidden" name="date"       value="{{ selected_date }}"/>
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">✅ Step 2 — Mark Students</div>
+        <div class="card-sub">
+          {{ student_list|length }} students · 
+          <span class="font-mono">{{ selected_date }}</span>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button type="button" class="btn btn-success btn-sm" onclick="markAll('Present')">
+          ✅ All Present
+        </button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="markAll('Absent')">
+          ❌ All Absent
+        </button>
+      </div>
+    </div>
+
+    {% for s in student_list %}
+    <div class="toggle-row" style="border-bottom:1px solid var(--border);">
+      <span class="student-num">{{ loop.index }}</span>
+      <div style="flex:1;">
+        <div class="fw-600">{{ s.name }}</div>
+        <div class="text-muted text-sm font-mono">ID: {{ s.student_id }}</div>
+      </div>
+      {% if s.existing %}
+        <span class="badge badge-{{ s.existing.lower() }}" style="font-size:13px;">
+          Already {{ s.existing }}
+        </span>
+      {% else %}
+      <div class="toggle-wrap" id="wrap-{{ s.student_id }}">
+        <input type="radio" class="sr-only" name="status_{{ s.student_id }}"
+               id="p{{ s.student_id }}" value="Present" checked/>
+        <label for="p{{ s.student_id }}" class="toggle-opt present">Present</label>
+
+        <input type="radio" class="sr-only" name="status_{{ s.student_id }}"
+               id="a{{ s.student_id }}" value="Absent"/>
+        <label for="a{{ s.student_id }}" class="toggle-opt absent">Absent</label>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div style="padding:20px 14px 0;">
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px;">
+        💾 Save Attendance
+      </button>
+    </div>
+  </div>
+</form>
+
+{% elif selected_subject %}
+<div class="card">
+  <div class="empty">
+    <div class="empty-icon">👥</div>
+    <div class="empty-text">No students found. Please add students first.</div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function markAll(status) {
+  document.querySelectorAll('.toggle-wrap').forEach(wrap => {
+    const radios = wrap.querySelectorAll('input[type=radio]');
+    const labels = wrap.querySelectorAll('.toggle-opt');
+    radios.forEach((r, i) => {
+      r.checked = (r.value === status);
+      labels[i].style.background = '';
+      labels[i].style.color = '';
+      if (r.checked) {
+        labels[i].style.background = status === 'Present' ? '#22c55e' : '#ef4444';
+        labels[i].style.color = '#fff';
+      }
+    });
+  });
+}
+
+// Initialize toggle colors on load
+document.querySelectorAll('.toggle-wrap').forEach(wrap => {
+  const radios = wrap.querySelectorAll('input[type=radio]');
+  const labels = wrap.querySelectorAll('.toggle-opt');
+  const refresh = () => {
+    labels.forEach((l, i) => {
+      l.style.background = '';
+      l.style.color = '';
+      if (radios[i].checked) {
+        l.style.background = radios[i].value === 'Present' ? '#22c55e' : '#ef4444';
+        l.style.color = '#fff';
+      }
+    });
+  };
+  radios.forEach(r => r.addEventListener('change', refresh));
+  refresh();
+});
+</script>
+{% endblock %}

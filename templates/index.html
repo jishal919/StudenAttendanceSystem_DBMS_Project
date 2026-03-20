@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_sub %}Welcome back — here's today's snapshot{% endblock %}
+
+{% block content %}
+
+<!-- Stat Cards -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue">👥</div>
+    <div>
+      <div class="stat-val">{{ total_students }}</div>
+      <div class="stat-label">Total Students</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon purple">📚</div>
+    <div>
+      <div class="stat-val">{{ total_subjects }}</div>
+      <div class="stat-label">Active Subjects</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon amber">🗂️</div>
+    <div>
+      <div class="stat-val">{{ total_classes }}</div>
+      <div class="stat-label">Classes Recorded</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">📈</div>
+    <div>
+      <div class="stat-val">{{ avg_pct }}%</div>
+      <div class="stat-label">Overall Attendance</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions + Recent Activity -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+  <!-- Quick Actions -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">⚡ Quick Actions</div>
+        <div class="card-sub">Jump to common tasks</div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <a href="{{ url_for('mark_attendance') }}" class="btn btn-primary">
+        ✅ Mark Today's Attendance
+      </a>
+      <a href="{{ url_for('students') }}" class="btn btn-ghost">
+        👤 Add New Student
+      </a>
+      <a href="{{ url_for('report') }}" class="btn btn-ghost">
+        📋 View Full Report
+      </a>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🕐 Recent Activity</div>
+        <div class="card-sub">Last 5 entries</div>
+      </div>
+    </div>
+    {% if recent %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Student</th><th>Subject</th><th>Date</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for r in recent %}
+          <tr>
+            <td class="fw-600">{{ r.student_name }}</td>
+            <td class="text-muted text-sm">{{ r.subject_name }}</td>
+            <td class="font-mono text-sm">{{ r.date }}</td>
+            <td>
+              <span class="badge badge-{{ r.status.lower() }}">{{ r.status }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">📭</div>
+      <div class="empty-text">No attendance recorded yet.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
