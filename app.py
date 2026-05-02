@@ -3,11 +3,9 @@ import mysql.connector
 from datetime import date
 
 app = Flask(__name__)
-app.secret_key = 'attendance_sys_secret_2025'
+app.secret_key = ''
 
-# ──────────────────────────────────────────
-#  DATABASE CONFIG  ← change password here
-# ──────────────────────────────────────────
+
 DB_CONFIG = {
     'host':     'localhost',
     'user':     'root',
